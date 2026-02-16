@@ -1,0 +1,48 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+
+# Node / Vite
+**/node_modules/
+**/dist/
+**/.vite/
+**/.turbo/
+**/.cache/
+
+# Env secrets
+**/.env
+**/.env.*
+!.env.example
+
+# Logs
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+
+# Python venv
+.venv/
+# Python / scrapers / debug
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.txt
+*.html
+debug_*
+test_*
+result_*
+output_*
+api_*
+sauto_*
+
+# scripts and backend
+*.py
+
+# secrets
+serviceAccountKey.json
+
+# agent cache
+.agent/

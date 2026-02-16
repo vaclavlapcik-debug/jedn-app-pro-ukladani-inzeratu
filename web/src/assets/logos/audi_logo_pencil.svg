@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <g class="pencil-fill">
+    <ellipse cx="28" cy="60" rx="15" ry="10" />
+    <ellipse cx="49" cy="60" rx="15" ry="10" />
+    <ellipse cx="71" cy="60" rx="15" ry="10" />
+    <ellipse cx="92" cy="60" rx="15" ry="10" />
+  </g>
+  <ellipse class="pencil-stroke" cx="28" cy="60" rx="16" ry="11" />
+  <ellipse class="pencil-stroke2" cx="29.5" cy="61.5" rx="15" ry="10" />
+  <ellipse class="pencil-stroke" cx="49" cy="60" rx="16" ry="11" />
+  <ellipse class="pencil-stroke2" cx="50.5" cy="61.5" rx="15" ry="10" />
+  <ellipse class="pencil-stroke" cx="71" cy="60" rx="16" ry="11" />
+  <ellipse class="pencil-stroke2" cx="72.5" cy="61.5" rx="15" ry="10" />
+  <ellipse class="pencil-stroke" cx="92" cy="60" rx="16" ry="11" />
+  <ellipse class="pencil-stroke2" cx="93.5" cy="61.5" rx="15" ry="10" />
+</svg>

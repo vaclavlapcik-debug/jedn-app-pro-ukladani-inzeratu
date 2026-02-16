@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <g class="pencil-fill">
+    <path d="M60 22 L80 60 L60 98 L40 60 Z" />
+    <path d="M60 38 L70 60 L60 82 L50 60 Z" />
+  </g>
+  <path class="pencil-stroke" d="M60 22 L80 60 L60 98 L40 60 Z" />
+  <path class="pencil-stroke2" d="M61.5 23 L81.5 61 L61.5 99 L41.5 61 Z" />
+  <path class="pencil-stroke" d="M60 38 L70 60 L60 82 L50 60 Z" />
+  <path class="pencil-stroke2" d="M61.5 39 L71.5 61 L61.5 83 L51.5 61 Z" />
+</svg>

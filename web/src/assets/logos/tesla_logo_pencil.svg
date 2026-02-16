@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <g class="pencil-fill">
+    <path d="M52 35 C57 31 63 31 68 35 L62 74 L58 74 Z" />
+  </g>
+  <path class="pencil-stroke" d="M35 32 C45 24 75 24 85 32" />
+  <path class="pencil-stroke2" d="M36 33 C46 25 76 25 86 33" />
+  <path class="pencil-stroke" d="M48 39 C54 35 66 35 72 39" />
+  <path class="pencil-stroke2" d="M49 40 C55 36 67 36 73 40" />
+  <path class="pencil-stroke" d="M60 38 L60 87" />
+  <path class="pencil-stroke2" d="M61.5 39 L61.5 88" />
+</svg>

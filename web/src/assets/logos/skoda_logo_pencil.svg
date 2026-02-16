@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <g class="pencil-fill">
+    <path d="M48 70 L76 58 L67 83 L52 83 Z" />
+    <circle cx="72" cy="52" r="3.5" />
+  </g>
+  <circle class="pencil-stroke" cx="60" cy="60" r="36" />
+  <circle class="pencil-stroke2" cx="61.5" cy="61.5" r="35" />
+  <path class="pencil-stroke" d="M46 70 L76 58 L66 84 L51 84 Z" />
+  <path class="pencil-stroke2" d="M47 71 L77 59 L67 85 L52 85 Z" />
+  <path class="pencil-stroke" d="M64 54 L74 48 L71 58 Z" />
+  <path class="pencil-stroke2" d="M65 55 L75 49 L72 59 Z" />
+  <circle class="pencil-stroke" cx="72" cy="52" r="3.5" />
+  <circle class="pencil-stroke2" cx="73" cy="53" r="3.5" />
+</svg>

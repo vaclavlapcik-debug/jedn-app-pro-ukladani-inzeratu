@@ -1,0 +1,629 @@
+﻿diff --git a/web/vite.config.ts b/web/vite.config.ts
+--- a/web/vite.config.ts
++++ b/web/vite.config.ts
+@@
+ import { defineConfig } from 'vite'
+ import react from '@vitejs/plugin-react'
++import svgr from 'vite-plugin-svgr'
+ 
+ // https://vite.dev/config/
+ export default defineConfig({
+-  plugins: [react()],
++  plugins: [react(), svgr()],
+ })
+diff --git a/web/src/declarations.d.ts b/web/src/declarations.d.ts
+--- a/web/src/declarations.d.ts
++++ b/web/src/declarations.d.ts
+@@
+ declare module "*.png" {
+     const value: string;
+     export default value;
+ }
++
++declare module "*.svg?react" {
++  import * as React from "react";
++  const ReactComponent: React.FC<React.SVGProps<SVGSVGElement>>;
++  export default ReactComponent;
++}
+diff --git a/web/src/index.css b/web/src/index.css
+--- a/web/src/index.css
++++ b/web/src/index.css
+@@
+ .price-counter {
+   font-variant-numeric: tabular-nums;
+   transition: color 0.4s ease;
+   font-weight: 800;
+   letter-spacing: -0.02em;
+ }
++
++/* ================================
++   Brand SVG “pencil coloring” hover
++   ================================ */
++.brand{ display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
++.logo{ width:48px; height:48px; display:block; }
++
++/* Outline stays visible */
++.logo .outline{ stroke:currentColor; fill:none; }
++
++/* Pencil hatch fill (revealed by mask rect) */
++.logo .fill{ opacity:0.95; }
++
++/* SVG transforms need transform-box for consistent behavior */
++.logo .revealRect{
++  transform-box: fill-box;
++  transform-origin: 0% 50%;
++  transform: scaleX(0);
++  transition: transform 900ms cubic-bezier(.22,1,.36,1);
++}
++
++.brand:hover .logo .revealRect,
++.brand:focus-visible .logo .revealRect,
++.brand:focus-within .logo .revealRect{
++  transform: scaleX(1);
++}
++
++@media (prefers-reduced-motion: reduce){
++  .logo .revealRect{ transition:none; transform: scaleX(1); }
++}
+diff --git a/web/src/components/BrandIcon.tsx b/web/src/components/BrandIcon.tsx
+new file mode 100644
+--- /dev/null
++++ b/web/src/components/BrandIcon.tsx
+@@
++import React from "react";
++
++type Props = {
++  Logo: React.FC<React.SVGProps<SVGSVGElement>>;
++  name: string;
++  color?: string;
++  size?: number;
++  tabIndex?: number;
++};
++
++export function BrandIcon({
++  Logo,
++  name,
++  color = "#111",
++  size = 48,
++  tabIndex = 0,
++}: Props) {
++  return (
++    <span
++      className="brand"
++      title={name}
++      style={{ color, width: size, height: size }}
++      tabIndex={tabIndex}
++      aria-label={name}
++    >
++      <Logo className="logo" width={size} height={size} />
++    </span>
++  );
++}
+diff --git a/web/src/data/brandLogos.ts b/web/src/data/brandLogos.ts
+--- a/web/src/data/brandLogos.ts
++++ b/web/src/data/brandLogos.ts
+@@
+ // Brand catalog data — primary source for the catalog homepage
+ // Models listed here are for display; only some have detailed data in cars_static.ts
+ 
+-// Import logos
+-import logo1_1 from '../assets/logos/logo_1_1_unknown.png'; // Škoda
+-import logo1_2 from '../assets/logos/logo_1_2_unknown.png'; // ???
+-import logo1_3 from '../assets/logos/logo_1_3_unknown.png'; // Tesla
+-import logo1_4 from '../assets/logos/logo_1_4_unknown.png'; // Kia
+-
+-import logo2_1 from '../assets/logos/logo_2_1_unknown.png'; // Hyundai
+-import logo2_2 from '../assets/logos/logo_2_2_unknown.png'; // VW
+-import logo2_3 from '../assets/logos/logo_2_3_unknown.png'; // ?
+-import logo2_4 from '../assets/logos/logo_2_4_unknown.png'; // ?
+-
+-import logo3_1 from '../assets/logos/logo_3_1_unknown.png'; // MG
+-import logo3_2 from '../assets/logos/logo_3_2_unknown.png'; // Volvo?
+-import logo3_3 from '../assets/logos/logo_3_3_unknown.png'; // Renault
+-import logo3_4 from '../assets/logos/logo_3_4_unknown.png'; // Dacia
+-
+-import logo4_1 from '../assets/logos/logo_4_1_unknown.png'; // BMW?
+-import logo4_2 from '../assets/logos/logo_4_2_unknown.png'; // Audi?
+-import logo4_3 from '../assets/logos/logo_4_3_unknown.png'; // Mercedes?
+-import logo4_4 from '../assets/logos/logo_4_4_unknown.png'; // Volvo2?
++import type { FunctionComponent, SVGProps } from "react";
++import SkodaLogo from "../assets/logos/skoda_logo_pencil.svg?react";
++import TeslaLogo from "../assets/logos/tesla_logo_pencil.svg?react";
++import HyundaiLogo from "../assets/logos/hyundai_logo_pencil.svg?react";
++import KiaLogo from "../assets/logos/kia_logo_pencil.svg?react";
++import VolkswagenLogo from "../assets/logos/volkswagen_logo_pencil.svg?react";
++import BMWLogo from "../assets/logos/bmw_logo_pencil.svg?react";
++import MercedesLogo from "../assets/logos/mercedes_logo_pencil.svg?react";
++import AudiLogo from "../assets/logos/audi_logo_pencil.svg?react";
++import MGLogo from "../assets/logos/mg_logo_pencil.svg?react";
++import VolvoLogo from "../assets/logos/volvo_logo_pencil.svg?react";
++import RenaultLogo from "../assets/logos/renault_logo_pencil.svg?react";
++import DaciaLogo from "../assets/logos/dacia_logo_pencil.svg?react";
+@@
+ export interface BrandInfo {
+     make: string;
+     displayName: string;
+     textLogo: string;
+-    logoSrc?: string; // Path to PNG logo
++    logoSrc?: string; // optional fallback
++    logoComponent?: FunctionComponent<SVGProps<SVGSVGElement>>;
+     accentColor: string;
+     description: string;
+     models: BrandModel[];
+     segment: 'mainstream' | 'premium' | 'budget';
+ }
+@@
+       {
+           make: 'Škoda',
+           displayName: 'Škoda',
+           textLogo: 'Š',
+-          logoSrc: logo1_1,
++          logoComponent: SkodaLogo,
+           accentColor: '#4ba82e',
+           description: 'Kompaktní až rodinné SUV',
+           segment: 'mainstream',
+           models: [
+               { name: 'Elroq', badge: 'novinka!' },
+               { name: 'Enyaq' },
+               { name: 'Enyaq Coupé' },
+               { name: 'Epiq', badge: 'předobjednávky' },
+           ]
+       },
+       {
+           make: 'Volkswagen',
+           displayName: 'VW',
+           textLogo: 'VW',
+-          logoSrc: logo2_2,
++          logoComponent: VolkswagenLogo,
+           accentColor: '#001e50',
+           description: 'Hatchback, SUV, MPV',
+           segment: 'mainstream',
+           models: [
+               { name: 'ID.3' },
+               { name: 'ID.4' },
+               { name: 'ID.5' },
+               { name: 'ID.7', badge: 'vlajková loď' },
+               { name: 'ID. Buzz' },
+           ]
+       },
+       {
+           make: 'Hyundai',
+           displayName: 'Hyundai',
+           textLogo: 'H',
+-          logoSrc: logo2_1,
++          logoComponent: HyundaiLogo,
+           accentColor: '#002c5f',
+           description: 'Mix kategorií',
+           segment: 'mainstream',
+           models: [
+               { name: 'Ioniq 5' },
+               { name: 'Ioniq 6' },
+               { name: 'Kona Electric' },
+               { name: 'Inster', badge: 'městské' },
+           ]
+       },
+       {
+           make: 'Kia',
+           displayName: 'Kia',
+           textLogo: 'K',
+-          logoSrc: logo1_4,
++          logoComponent: KiaLogo,
+           accentColor: '#05141f',
+           description: 'Crossovery, velká SUV',
+           segment: 'mainstream',
+           models: [
+               { name: 'EV6' },
+               { name: 'EV9', badge: '7místné' },
+               { name: 'EV3' },
+               { name: 'Niro EV' },
+           ]
+       },
+       {
+           make: 'Tesla',
+           displayName: 'Tesla',
+           textLogo: 'T',
+-          logoSrc: logo1_3,
++          logoComponent: TeslaLogo,
+           accentColor: '#cc0000',
+           description: 'Crossovery, sedany',
+           segment: 'mainstream',
+           models: [
+               { name: 'Model Y' },
+               { name: 'Model 3', badge: 'Highland' },
+               { name: 'Model S' },
+               { name: 'Model X' },
+           ]
+       },
+       {
+           make: 'Renault',
+           displayName: 'Renault',
+           textLogo: 'R',
+-          logoSrc: logo3_3,
++          logoComponent: RenaultLogo,
+           accentColor: '#efdf00',
+           description: 'Stylové crossovery',
+           segment: 'mainstream',
+           models: [
+               { name: 'Mégane E-Tech' },
+               { name: 'Scenic E-Tech' },
+               { name: 'Renault 5 E-Tech' },
+           ]
+       },
+       {
+           make: 'MG',
+           displayName: 'MG',
+           textLogo: 'MG',
+-          logoSrc: logo3_1,
++          logoComponent: MGLogo,
+           accentColor: '#c1272d',
+           description: 'Cenově dostupné, sportovní',
+           segment: 'mainstream',
+           models: [
+               { name: 'MG4 Electric' },
+               { name: 'MG5', badge: 'kombi' },
+               { name: 'ZS EV' },
+               { name: 'Cyberster' },
+           ]
+       },
+       {
+           make: 'Volvo',
+           displayName: 'Volvo',
+           textLogo: 'V',
+-          logoSrc: logo3_2,
++          logoComponent: VolvoLogo,
+           accentColor: '#003057',
+           description: 'Skandinávský design, bezpečnost',
+           segment: 'mainstream',
+           models: [
+               { name: 'EX30' },
+               { name: 'EX40', badge: 'dříve XC40' },
+               { name: 'EX90' },
+               { name: 'EX60' },
+           ]
+       },
+@@
+       {
+           make: 'BMW',
+           displayName: 'BMW',
+           textLogo: 'B',
+-          logoSrc: logo4_1,
++          logoComponent: BMWLogo,
+           accentColor: '#0066b1',
+           description: 'Prémiové sedany a SUV',
+           segment: 'premium',
+           models: [
+               { name: 'i4' },
+               { name: 'iX3', badge: 'nová generace' },
+               { name: 'iX1' },
+               { name: 'iX' },
+               { name: 'i5' },
+               { name: 'i7' },
+           ]
+       },
+       {
+           make: 'Mercedes-Benz',
+           displayName: 'Mercedes',
+           textLogo: 'M',
+-          logoSrc: logo4_3,
++          logoComponent: MercedesLogo,
+           accentColor: '#333333',
+           description: 'Luxusní segment',
+           segment: 'premium',
+           models: [
+               { name: 'EQA' },
+               { name: 'EQB' },
+               { name: 'EQE' },
+               { name: 'EQS' },
+               { name: 'CLA', badge: 'nová generace' },
+           ]
+       },
+       {
+           make: 'Audi',
+           displayName: 'Audi',
+           textLogo: 'A',
+-          logoSrc: logo4_2,
++          logoComponent: AudiLogo,
+           accentColor: '#bb0a30',
+           description: 'Prémiové SUV',
+           segment: 'premium',
+           models: [
+               { name: 'Q4 e-tron' },
+               { name: 'Q6 e-tron' },
+               { name: 'Q8 e-tron' },
+               { name: 'e-tron GT' },
+           ]
+       },
+@@
+       {
+           make: 'Dacia',
+           displayName: 'Dacia',
+           textLogo: 'D',
+-          logoSrc: logo3_4,
++          logoComponent: DaciaLogo,
+           accentColor: '#646b52',
+           description: 'Nejlevnější městské auto',
+           segment: 'budget',
+           models: [
+               { name: 'Spring' },
+           ]
+       },
+diff --git a/web/src/components/BrandGrid.tsx b/web/src/components/BrandGrid.tsx
+--- a/web/src/components/BrandGrid.tsx
++++ b/web/src/components/BrandGrid.tsx
+@@
+ import React, { useState, useMemo } from 'react';
+ import { ChevronDown, ArrowRight, Sparkles } from 'lucide-react';
+ import type { CarStaticData } from '../data/cars_static';
+ import { BRAND_CATALOG } from '../data/brandLogos';
+ import type { BrandInfo } from '../data/brandLogos';
++import { BrandIcon } from './BrandIcon';
+@@
+-                                            {brand.logoSrc ? (
++                                            {brand.logoComponent ? (
++                                                <BrandIcon Logo={brand.logoComponent} name={brand.displayName} color={brand.accentColor} />
++                                            ) : brand.logoSrc ? (
+                                                 <img
+                                                     src={brand.logoSrc}
+                                                     alt={brand.displayName}
+                                                     className="w-full h-full object-contain p-2"
+                                                 />
+                                             ) : (
+                                                 <span className="text-xl font-black tracking-tight select-none brand-text-color">
+                                                     {brand.textLogo}
+                                                 </span>
+                                             )}
+@@
+-                                                    {brand.logoSrc ? (
++                                                    {brand.logoComponent ? (
++                                                        <BrandIcon Logo={brand.logoComponent} name={brand.displayName} size={40} color={brand.accentColor} />
++                                                    ) : brand.logoSrc ? (
+                                                         <img
+                                                             src={brand.logoSrc}
+                                                             alt={brand.displayName}
+                                                             className="w-full h-full object-contain p-1.5"
+                                                         />
+                                                     ) : (
+                                                         <span className="text-base font-black brand-text-color">
+                                                             {brand.textLogo}
+                                                         </span>
+                                                     )}
+diff --git a/web/src/assets/logos/skoda_logo_pencil.svg b/web/src/assets/logos/skoda_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/skoda_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-skoda" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-skoda">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M128 20 A108 108 0 1 1 127.9 20 M90 120 L140 90 L125 120 L170 120 L110 170" fill="url(#pencilHatch-skoda)" stroke="none" mask="url(#revealMask-skoda)"/>
++    <path class="outline" d="M128 20 A108 108 0 1 1 127.9 20 M90 120 L140 90 L125 120 L170 120 L110 170"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/tesla_logo_pencil.svg b/web/src/assets/logos/tesla_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/tesla_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-tesla" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-tesla">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M40 60 L216 60 L150 60 L128 140 L106 60 L40 60" fill="url(#pencilHatch-tesla)" stroke="none" mask="url(#revealMask-tesla)"/>
++    <path class="outline" d="M40 60 L216 60 L150 60 L128 140 L106 60 L40 60"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/hyundai_logo_pencil.svg b/web/src/assets/logos/hyundai_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/hyundai_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-hyundai" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-hyundai">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M40 128 A88 56 0 1 0 216 128 A88 56 0 1 0 40 128 M90 128 L120 100 L120 156 L166 100 L166 156" fill="url(#pencilHatch-hyundai)" stroke="none" mask="url(#revealMask-hyundai)"/>
++    <path class="outline" d="M40 128 A88 56 0 1 0 216 128 A88 56 0 1 0 40 128 M90 128 L120 100 L120 156 L166 100 L166 156"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/kia_logo_pencil.svg b/web/src/assets/logos/kia_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/kia_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-kia" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-kia">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M40 170 L90 90 L110 150 L140 90 L160 150 L210 90" fill="url(#pencilHatch-kia)" stroke="none" mask="url(#revealMask-kia)"/>
++    <path class="outline" d="M40 170 L90 90 L110 150 L140 90 L160 150 L210 90"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/volkswagen_logo_pencil.svg b/web/src/assets/logos/volkswagen_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/volkswagen_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-volkswagen" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-volkswagen">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M128 20 A108 108 0 1 1 127.9 20 M70 90 L100 150 L128 110 L156 150 L186 90" fill="url(#pencilHatch-volkswagen)" stroke="none" mask="url(#revealMask-volkswagen)"/>
++    <path class="outline" d="M128 20 A108 108 0 1 1 127.9 20 M70 90 L100 150 L128 110 L156 150 L186 90"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/bmw_logo_pencil.svg b/web/src/assets/logos/bmw_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/bmw_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-bmw" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-bmw">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M128 20 A108 108 0 1 1 127.9 20 M128 20 L128 236 M20 128 L236 128" fill="url(#pencilHatch-bmw)" stroke="none" mask="url(#revealMask-bmw)"/>
++    <path class="outline" d="M128 20 A108 108 0 1 1 127.9 20 M128 20 L128 236 M20 128 L236 128"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/mercedes_logo_pencil.svg b/web/src/assets/logos/mercedes_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/mercedes_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-mercedes" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-mercedes">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M128 20 A108 108 0 1 1 127.9 20 M128 40 L128 140 L60 180 M128 140 L196 180" fill="url(#pencilHatch-mercedes)" stroke="none" mask="url(#revealMask-mercedes)"/>
++    <path class="outline" d="M128 20 A108 108 0 1 1 127.9 20 M128 40 L128 140 L60 180 M128 140 L196 180"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/audi_logo_pencil.svg b/web/src/assets/logos/audi_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/audi_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-audi" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-audi">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M40 128 A40 40 0 1 1 120 128 A40 40 0 1 1 40 128 M80 128 A40 40 0 1 1 160 128 A40 40 0 1 1 80 128 M120 128 A40 40 0 1 1 200 128 A40 40 0 1 1 120 128 M160 128 A40 40 0 1 1 240 128 A40 40 0 1 1 160 128" fill="url(#pencilHatch-audi)" stroke="none" mask="url(#revealMask-audi)"/>
++    <path class="outline" d="M40 128 A40 40 0 1 1 120 128 A40 40 0 1 1 40 128 M80 128 A40 40 0 1 1 160 128 A40 40 0 1 1 80 128 M120 128 A40 40 0 1 1 200 128 A40 40 0 1 1 120 128 M160 128 A40 40 0 1 1 240 128 A40 40 0 1 1 160 128"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/mg_logo_pencil.svg b/web/src/assets/logos/mg_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/mg_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-mg" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-mg">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M80 20 L176 20 L236 80 L236 176 L176 236 L80 236 L20 176 L20 80 L80 20 M70 170 L70 100 L110 150 L150 100 L150 170" fill="url(#pencilHatch-mg)" stroke="none" mask="url(#revealMask-mg)"/>
++    <path class="outline" d="M80 20 L176 20 L236 80 L236 176 L176 236 L80 236 L20 176 L20 80 L80 20 M70 170 L70 100 L110 150 L150 100 L150 170"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/volvo_logo_pencil.svg b/web/src/assets/logos/volvo_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/volvo_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-volvo" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-volvo">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M60 128 A68 68 0 1 1 128 196 L196 60 M196 60 L196 110" fill="url(#pencilHatch-volvo)" stroke="none" mask="url(#revealMask-volvo)"/>
++    <path class="outline" d="M60 128 A68 68 0 1 1 128 196 L196 60 M196 60 L196 110"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/renault_logo_pencil.svg b/web/src/assets/logos/renault_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/renault_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-renault" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-renault">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M128 20 L200 128 L128 236 L56 128 L128 20" fill="url(#pencilHatch-renault)" stroke="none" mask="url(#revealMask-renault)"/>
++    <path class="outline" d="M128 20 L200 128 L128 236 L56 128 L128 20"/>
++  </g>
++</svg>
+diff --git a/web/src/assets/logos/dacia_logo_pencil.svg b/web/src/assets/logos/dacia_logo_pencil.svg
+new file mode 100644
+--- /dev/null
++++ b/web/src/assets/logos/dacia_logo_pencil.svg
+@@
++<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
++  <defs>
++    <pattern id="pencilHatch-dacia" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(25)">
++      <path d="M0 8 L8 0" stroke="currentColor" stroke-width="1" opacity="0.35"/>
++      <path d="M-2 10 L10 -2" stroke="currentColor" stroke-width="1" opacity="0.20"/>
++    </pattern>
++    <mask id="revealMask-dacia">
++      <rect class="revealRect" x="0" y="0" width="256" height="256" fill="white"/>
++    </mask>
++  </defs>
++  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
++    <path class="fill" d="M60 60 L196 60 L216 120 L128 200 L40 120 L60 60" fill="url(#pencilHatch-dacia)" stroke="none" mask="url(#revealMask-dacia)"/>
++    <path class="outline" d="M60 60 L196 60 L216 120 L128 200 L40 120 L60 60"/>
++  </g>
++</svg>

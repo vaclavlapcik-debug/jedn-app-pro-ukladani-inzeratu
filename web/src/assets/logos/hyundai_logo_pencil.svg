@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <g class="pencil-fill">
+    <ellipse cx="60" cy="60" rx="30" ry="20" />
+    <path d="M46 67 L56 49 L64 71 L74 53" />
+  </g>
+  <ellipse class="pencil-stroke" cx="60" cy="60" rx="34" ry="23" />
+  <ellipse class="pencil-stroke2" cx="61.5" cy="61.5" rx="33" ry="22" />
+  <path class="pencil-stroke" d="M43 68 L50 51 L61 69 L70 51 L77 68" />
+  <path class="pencil-stroke2" d="M44.5 69 L51.5 52 L62.5 70 L71.5 52 L78.5 69" />
+  <path class="pencil-stroke" d="M50 60 L70 60" />
+  <path class="pencil-stroke2" d="M51 61 L71 61" />
+</svg>
