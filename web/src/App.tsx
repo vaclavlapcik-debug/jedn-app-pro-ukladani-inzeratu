@@ -623,6 +623,10 @@ function App() {
         />
       )}
 
+      <div className="fixed bottom-4 right-4 z-40 rounded-md bg-gray-900 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-lg">
+        JEDN APP DEV
+      </div>
+
     </div>
   );
 }
